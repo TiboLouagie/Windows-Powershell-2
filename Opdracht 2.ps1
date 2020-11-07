@@ -1,5 +1,5 @@
-#======1.1 MS share for personeel======
-#region MS
+#======1.1======
+#region - MS share for personeel
 
 #Making new folder
 New-Item -ItemType directory -Path C:\Public
@@ -35,14 +35,14 @@ New-SmbShare -Name Public -Path C:\Public -FullAccess everyone
     #testing can be done to use a user account and search for \\MS\Public
 
 #endregion
-#======1.2 MS P:-public
-#region Disk mapping
+#======1.2======
+#region - MS P:-public Disk mapping
 
 New-PSDrive -Name "P" -PSProvider FileSystem -Root "C:\Public" -Persist
 
 #endregion
 #======Optional======
-#region Intranet webserver
+#region - Intranet webserver
 
 #Installing IIS on MS
 Install-WindowsFeature -name Web-Server -IncludeManagementTools
@@ -103,7 +103,7 @@ Add-DnsServerResourceRecordA -Name intranet -iPv4Address 192.168.1.4 -ZoneName i
     Set-WebConfigurationProperty -filter /system.WebServer/security/authentication/AnonymousAuthentication -name enabled -value false -PSPath "IIS:\" -location 'intranet'
 
 #endregion
-#region Resto webserver
+#region - Resto webserver
 
 #resto map creation
 New-Item -ItemType directory -Path C:\inetpub\resto
@@ -132,5 +132,32 @@ Set-WebConfigurationProperty -filter "/system.webServer/security/authentication/
 
 #disable anonymous authentication
 Set-WebConfigurationProperty -filter /system.WebServer/security/authentication/AnonymousAuthentication -name enabled -value false -PSPath "IIS:\" -location 'resto'
+
+#endregion
+#======2.1======
+#region - DC2 Roaming profiles
+
+#https://sid-500.com/2017/08/27/active-directory-configuring-roaming-profiles-using-gui-and-powershell/ 
+
+#Making new folder
+New-Item -ItemType direcotry -path C:\Profiles
+
+#Share new folder
+New-SmbShare -Name Profiles -Path C:\Profiles -FullAccess Everyone
+
+#Make directory 'hidden'
+$f=get-item C:\Profiles -Force
+$f.Attributes="Hidden"
+
+
+#endregion
+#======2.2======
+#region - Roaming profiles on share -Profiles
+
+#Changing secretary profile path (on DC1)
+#Couldn't find a way to change profile path for entire group
+Set-ADUser -Identity Annemieke -ProfilePath \\DC2\Profiles\%username%
+Set-ADUser -Identity Rozemieke -ProfilePath \\Team08-DC2\profiles\%username%
+
 
 #endregion
