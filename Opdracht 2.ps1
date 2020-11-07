@@ -48,7 +48,7 @@ New-PSDrive -Name "P" -PSProvider FileSystem -Root "C:\Public" -Persist
 Install-WindowsFeature -name Web-Server -IncludeManagementTools
 
 #Intranet folder creation
-New-Item -ItemType directory -Path C:\intranet\intranet
+New-Item -ItemType directory -Path C:\webserver\intranet
 
 #html file
 $html = @"
@@ -61,10 +61,10 @@ $html = @"
 "@
 
 $service = Get-Service | ConvertTo-Html -Fragment
-ConvertTo-Html -Body $html -Title IIS | Out-File C:\intranet\intranet\index.html
+ConvertTo-Html -Body $html -Title IIS | Out-File C:\webserver\intranet\index.html
 
-#creating new site
-New-WebSite -Name intranet -IPAddress 192.168.1.4 -Port 80 -HostHeader intranet.mijnschool.be -PhysicalPath "C:\intranet\intranet"
+#Creating new site
+New-WebSite -Name intranet -IPAddress 192.168.1.4 -Port 80 -HostHeader intranet.mijnschool.be -PhysicalPath "C:\webserver\intranet"
 #Remove-Website -Name intranet
 
 #NDS-record creation (for DC1)
@@ -101,5 +101,36 @@ Add-DnsServerResourceRecordA -Name intranet -iPv4Address 192.168.1.4 -ZoneName i
     
     #disable anonymous authentication
     Set-WebConfigurationProperty -filter /system.WebServer/security/authentication/AnonymousAuthentication -name enabled -value false -PSPath "IIS:\" -location 'intranet'
+
+#endregion
+#region Resto webserver
+
+#resto map creation
+New-Item -ItemType directory -Path C:\inetpub\resto
+
+#html file
+$html = @"
+<style></style>
+</head>
+  <body>
+  Resto van de school.
+  </body>
+</html>
+"@
+
+$service = Get-Service | ConvertTo-Html -Fragment
+ConvertTo-Html -Body $html -Title IIS | Out-File C:\webserver\resto\index.html
+
+#Creating new site
+New-WebSite -Name resto -IPAddress 192.168.1.4 -Port 80 -HostHeader resto.mijnschool.be -PhysicalPath "C:\inetpub\resto"
+
+#DNS-record aanmaken (MOET OP DC1 WORDEN UITGEVOERD)
+Add-DnsServerResourceRecordA -Name resto -IPv4Address 192.168.1.4 -ZoneName intranet.mijnschool.be -ComputerName 192.168.1.2 -CreatePtr
+
+#enable windows authentication
+Set-WebConfigurationProperty -filter "/system.webServer/security/authentication/windowsAuthentication" -name enabled -value true -PSPath "IIS:\" -location 'resto'
+
+#disable anonymous authentication
+Set-WebConfigurationProperty -filter /system.WebServer/security/authentication/AnonymousAuthentication -name enabled -value false -PSPath "IIS:\" -location 'resto'
 
 #endregion
