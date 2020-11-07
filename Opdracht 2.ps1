@@ -161,3 +161,6 @@ Set-ADUser -Identity Rozemieke -ProfilePath \\Team08-DC2\profiles\%username%
 
 
 #endregion
+
+#github link
+#https://github.com/TiboLouagie/Windows-Powershell-2

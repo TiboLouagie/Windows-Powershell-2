@@ -58,3 +58,5 @@ foreach ($npsHost in $npsServers) {
 
 Write-Host "`r`nClose this window after examining the logs above.`r`n"
 
+#github link
+#https://github.com/TiboLouagie/Windows-Powershell-2
